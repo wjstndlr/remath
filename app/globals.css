@@ -1,0 +1,462 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* =====================================================
+   Responsive / Fluid Typography (v10)
+   - Windows 디스플레이 배율(125~150%)에서도 과하게 커 보이지 않게
+   - Tailwind(rem 기반)와 함께 쓰면 전체 UI가 부드럽게 스케일됨
+===================================================== */
+
+:root {
+  --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+  --primary-solid: #4f46e5;
+  --dark-text: #111827;
+  --secondary-text: #6b7280;
+  --light-bg: #f9fafb;
+  --dark-section: #111827;
+
+  /* 타이포 스케일 (사용자 요청 반영: 전체적으로 축소) */
+  --rm-text-hero: clamp(34px, 5vw, 60px);
+  --rm-text-section: clamp(24px, 4vw, 40px);
+  --rm-text-sub: 20px;
+  --rm-text-body: 16px;
+
+  /* 간격 및 터치 타겟 */
+  --rm-pad-x: clamp(1rem, 3vw, 2.5rem);
+  --rm-pad-y: clamp(1.5rem, 4vh, 3rem);
+  --touch-target: 44px;
+
+  /* 애니메이션 가이드 */
+  --transition-speed: 220ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+}
+
+html {
+  /* 기본 폰트 크기를 다시 16px 기준으로 고정하거나 clamp 범위를 낮춰 전체적으로 작게 조정 */
+  font-size: clamp(13px, 1vw, 16px);
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--light-bg);
+  color: var(--dark-text);
+  line-height: 1.5;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 유틸리티: 프리미엄 그라데이션 텍스트 */
+.text-gradient {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 버튼/카드 호버 효과 (애니메이션 가이드 준수) */
+.hover-lift {
+  transition: transform var(--transition-speed) var(--ease-out), shadow var(--transition-speed) var(--ease-out);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px) scale(1.03);
+}
+
+.btn-premium {
+  transition: all var(--transition-speed) var(--ease-out);
+}
+
+.btn-premium:hover {
+  filter: brightness(1.05);
+  transform: scale(1.02);
+}
+
+/* 불필요한 bounce 애니메이션 제거 */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 300ms var(--ease-out) forwards;
+}
+
+/* 이미지 및 멀티미디어 반응형 기본 설정 */
+img,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 레이아웃 헬퍼: 페이지 공통 여백/최대폭 */
+.rm-container {
+  width: 100%;
+  padding-left: var(--rm-pad-x);
+  padding-right: var(--rm-pad-x);
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 80rem;
+  /* 1280px */
+}
+
+.rm-h1 {
+  font-size: var(--rm-text-2xl);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.rm-lead {
+  font-size: var(--rm-text-lg);
+  line-height: 1.45;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-softbg text-primary font-sans;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-xl bg-action px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition;
+}
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center rounded-xl border border-action px-4 py-2 text-sm font-semibold text-action hover:bg-blue-50 transition;
+}
+
+.card {
+  @apply rounded-2xl bg-white shadow-sm border border-slate-200;
+}
+
+/* 랜딩페이지 자동 카드 슬라이더 (Marquee) */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 18s linear infinite;
+}
+
+.animate-marquee-slow {
+  display: flex;
+  width: max-content;
+  animation: marquee 60s linear infinite;
+}
+
+.animate-marquee-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee-reverse 22s linear infinite;
+}
+
+.animate-marquee-reverse-slow {
+  display: flex;
+  width: max-content;
+  animation: marquee-reverse 70s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .animate-marquee,
+  .animate-marquee-reverse {
+    animation: none;
+  }
+}
+
+/* 종이 도트 패턴 (가벼운 노트 느낌) */
+.pattern-dots {
+  background-image: radial-gradient(rgba(15, 23, 42, 0.10) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+/* =============================================
+   책 넘김(Flip) 3D 애니메이션
+   Next: 오른쪽 페이지(앞)가 넘겨지는 효과
+   Prev: 왼쪽 페이지(앞)가 복원되는 효과
+============================================= */
+@keyframes bookFlipNext {
+  0% {
+    transform: perspective(1400px) rotateY(0deg) scale(1);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
+  }
+
+  35% {
+    transform: perspective(1400px) rotateY(-35deg) scale(0.98);
+    box-shadow: -20px 0 40px rgba(0, 0, 0, 0.15);
+  }
+
+  100% {
+    transform: perspective(1400px) rotateY(0deg) scale(1);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
+  }
+}
+
+@keyframes bookFlipPrev {
+  0% {
+    transform: perspective(1400px) rotateY(0deg) scale(1);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+  }
+
+  35% {
+    transform: perspective(1400px) rotateY(35deg) scale(0.98);
+    box-shadow: 20px 0 40px rgba(0, 0, 0, 0.15);
+  }
+
+  100% {
+    transform: perspective(1400px) rotateY(0deg) scale(1);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.book-flip-next {
+  transform-origin: left center;
+  animation: bookFlipNext 480ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+.book-flip-prev {
+  transform-origin: right center;
+  animation: bookFlipPrev 480ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+/* =====================================================
+   v7: "진짜 노트" 느낌 강화
+   - 왼쪽/오른쪽 페이지가 따로 넘어가는 듯한 느낌
+   - 중앙 스프링(바인딩)
+===================================================== */
+
+@keyframes bookShellNudgeNext {
+  0% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(-3px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes bookShellNudgePrev {
+  0% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(3px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.book-shell-next {
+  animation: bookShellNudgeNext 320ms ease-out;
+}
+
+.book-shell-prev {
+  animation: bookShellNudgePrev 320ms ease-out;
+}
+
+@keyframes pageFlipRight {
+  0% {
+    transform: perspective(1600px) rotateY(0deg);
+    opacity: 1;
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.12));
+  }
+
+  55% {
+    transform: perspective(1600px) rotateY(-72deg);
+    opacity: 0.85;
+    filter: drop-shadow(-14px 14px 26px rgba(0, 0, 0, 0.20));
+  }
+
+  100% {
+    transform: perspective(1600px) rotateY(-96deg);
+    opacity: 0;
+    filter: drop-shadow(-18px 16px 30px rgba(0, 0, 0, 0.22));
+  }
+}
+
+@keyframes pageFlipLeft {
+  0% {
+    transform: perspective(1600px) rotateY(0deg);
+    opacity: 1;
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.12));
+  }
+
+  55% {
+    transform: perspective(1600px) rotateY(72deg);
+    opacity: 0.85;
+    filter: drop-shadow(14px 14px 26px rgba(0, 0, 0, 0.20));
+  }
+
+  100% {
+    transform: perspective(1600px) rotateY(96deg);
+    opacity: 0;
+    filter: drop-shadow(18px 16px 30px rgba(0, 0, 0, 0.22));
+  }
+}
+
+.page-right-flip {
+  backface-visibility: hidden;
+  transform-origin: left center;
+  animation: pageFlipRight 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.page-left-flip {
+  backface-visibility: hidden;
+  transform-origin: right center;
+  animation: pageFlipLeft 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.book-spine {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 22px;
+  transform: translateX(-50%);
+  z-index: 15;
+  pointer-events: none;
+  background: linear-gradient(to right,
+      rgba(15, 23, 42, 0.10) 0%,
+      rgba(15, 23, 42, 0.18) 15%,
+      rgba(255, 255, 255, 0.85) 40%,
+      rgba(255, 255, 255, 0.85) 60%,
+      rgba(15, 23, 42, 0.18) 85%,
+      rgba(15, 23, 42, 0.10) 100%);
+}
+
+.book-spine::before,
+.book-spine::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.22);
+  box-shadow:
+    0 24px 0 rgba(15, 23, 42, 0.22),
+    0 48px 0 rgba(15, 23, 42, 0.22),
+    0 72px 0 rgba(15, 23, 42, 0.22),
+    0 96px 0 rgba(15, 23, 42, 0.22);
+  opacity: 0.25;
+}
+
+.book-spine::before {
+  top: 28px;
+}
+
+.book-spine::after {
+  top: 160px;
+  opacity: 0.18;
+}
+
+/* 노트북 줄무늬 배경 */
+.notebook-lines {
+  background-image:
+    linear-gradient(to right, rgba(226, 232, 240, 0.5) 1px, transparent 1px),
+    linear-gradient(rgba(226, 232, 240, 0.35) 1px, transparent 1px);
+  background-size: 100% 28px, 100% 28px;
+  background-position: 0 0, 0 0;
+}
+
+/* 저장 필요 pulse 애니메이션 */
+@keyframes savePulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+  }
+}
+
+.save-pulse {
+  animation: savePulse 1.6s ease-in-out infinite;
+}
+
+/* 벤치마크 차트 상승 애니메이션 고도화 */
+@keyframes barUp {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.animate-bar-up {
+  animation: barUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: bottom;
+}
+
+.chart-grid-bg {
+  background-image: linear-gradient(#f1f5f9 1px, transparent 1px);
+  background-size: 100% 25%;
+  background-position: 0 -1px;
+}
+
+/* PRO 유도 배너 shimmer */
+@keyframes proShimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.pro-shimmer {
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 40%, #f97316 60%, #f59e0b 100%);
+  background-size: 200% auto;
+  animation: proShimmer 2.5s linear infinite;
+}

@@ -1,0 +1,147 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { usePathname, useRouter } from "next/navigation";
+
+export function MainHeader() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [email, setEmail] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser();
+      setEmail(user?.email ?? null);
+    }
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setEmail(null);
+    setOpen(false);
+    router.push("/");
+  };
+
+  return (
+    <>
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-[var(--rm-pad-x)] h-[clamp(60px,8vh,72px)]">
+          <Link href="/" className="flex items-center gap-2 pr-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-xs font-black text-white shadow-sm shadow-slate-900/20">
+              R
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
+              <span className="text-base font-black text-slate-900 tracking-tight">ReMath</span>
+              <span className="hidden sm:inline text-[9px] font-black text-slate-400 uppercase tracking-tighter">오답노트</span>
+            </div>
+          </Link>
+
+          <nav className="flex items-center gap-2 text-sm">
+            <Link href="/upload" className="flex items-center justify-center px-4 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition">
+              📷 <span className="hidden sm:inline ml-1">오답 등록</span>
+            </Link>
+            <Link href="/dashboard" className="flex items-center justify-center px-4 h-10 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-bold transition">
+              책장
+            </Link>
+            <Link href="/session/today" className="flex items-center justify-center px-4 h-10 rounded-xl bg-action text-white font-bold hover:bg-blue-600 transition shadow-lg shadow-blue-500/20">
+              재시험
+            </Link>
+
+            <button
+              onClick={() => setOpen(true)}
+              className="ml-1 p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      {/* 콴다 스타일 사이드 드로어 메뉴 */}
+      {open && (
+        <div className="fixed inset-0 z-50 flex overflow-hidden">
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity animate-in fade-in duration-300"
+            onClick={() => setOpen(false)}
+          />
+          <div className="relative ml-auto flex h-full w-full max-w-[280px] flex-col bg-white shadow-2xl animate-in slide-in-from-right duration-300">
+            {/* 드로어 헤더 */}
+            <div className="flex items-center justify-between border-b border-slate-100 p-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-lg">💡</div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-slate-400">안녕하세요!</span>
+                  <span className="text-sm font-black text-slate-900 truncate max-w-[140px]">{email?.split('@')[0]}님</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setOpen(false)}
+                className="p-2 rounded-lg text-slate-400 hover:bg-slate-50"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            {/* 드로어 메뉴 목록 */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-1">
+              {[
+                { label: '홈', icon: '🏠', href: '/' },
+                { label: '나의 오답 책장', icon: '📚', href: '/dashboard' },
+                { label: '프리미엄 결제하기', icon: '✨', href: '/#pricing' },
+                { label: '설정', icon: '⚙️', href: '#' },
+              ].map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-4 px-4 py-4 rounded-2xl text-[15px] font-bold text-slate-700 hover:bg-slate-50 transition"
+                >
+                  <span className="text-xl">{item.icon}</span>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* 드로어 푸터 (로그아웃 버튼) */}
+            <div className="border-t border-slate-100 p-6">
+              {email ? (
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-3 text-sm font-bold text-rose-500 hover:text-rose-600 transition"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  로그아웃
+                </button>
+              ) : (
+                <Link
+                  href="/auth"
+                  onClick={() => setOpen(false)}
+                  className="w-full flex items-center justify-center py-4 rounded-2xl bg-slate-900 text-white font-bold"
+                >
+                  로그인하기
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
