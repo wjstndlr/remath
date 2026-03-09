@@ -316,7 +316,7 @@ export default function InfiniteCanvas({
       const res = await fetch(dataUrl);
       const blob = await res.blob();
 
-      const filename = `${user.id}/${problemId}/handwriting_${Date.now()}.png`;
+      const filename = `${user.id}/${problemId}/handwriting.png`;
       console.log("📤 [Canvas Save] 스토리지 업로드 시도:", filename);
 
       const { error: upErr } = await supabase.storage
@@ -330,7 +330,8 @@ export default function InfiniteCanvas({
       console.log("✅ [Canvas Save] 스토리지 업로드 성공");
 
       const { data: urlData } = supabase.storage.from("solutions").getPublicUrl(filename);
-      const publicUrl = urlData.publicUrl;
+      // 🔥 캐시 브레이킹 (재수정 시 PDF 및 오답노트에 즉시 반영되도록 타임스탬프 추가)
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
       console.log("🔗 [Canvas Save] 공개 URL 생성됨:", publicUrl);
 
       console.log("💾 [Canvas Save] DB 테이블 업데이트 시도 (problems)...");

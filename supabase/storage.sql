@@ -40,6 +40,12 @@ CREATE POLICY "본인만 삭제 가능" ON storage.objects
 CREATE POLICY "모두 조회 가능" ON storage.objects
   FOR SELECT USING (bucket_id = 'problems');
 
+-- ✅ problems 버킷 UPDATE 정책 (upsert에 필요)
+CREATE POLICY "본인만 problems 업데이트 가능" ON storage.objects
+  FOR UPDATE USING (
+    bucket_id = 'problems' AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+
 -- solutions 버킷 정책
 CREATE POLICY "본인만 solutions 업로드 가능" ON storage.objects
   FOR INSERT WITH CHECK (
@@ -53,3 +59,9 @@ CREATE POLICY "본인만 solutions 삭제 가능" ON storage.objects
 
 CREATE POLICY "solutions 모두 조회 가능" ON storage.objects
   FOR SELECT USING (bucket_id = 'solutions');
+
+-- ✅ solutions 버킷 UPDATE 정책 (upsert에 필요 — handwriting.png 덮어쓰기)
+CREATE POLICY "본인만 solutions 업데이트 가능" ON storage.objects
+  FOR UPDATE USING (
+    bucket_id = 'solutions' AND auth.uid()::text = (storage.foldername(name))[1]
+  );

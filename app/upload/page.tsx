@@ -17,6 +17,99 @@ const UNITS: Record<Subject, string[]> = {
 };
 const SUBJECTS: Subject[] = ["수학1", "수학2", "미적분", "확통", "기하"];
 
+// ============================================================
+// 등록 완료 팝업 — 미끼 던지기 UX
+// ============================================================
+function RegistrationSuccessPopup({
+    problemId,
+    problemImageUrl,
+    onStart,
+    onSkip,
+}: {
+    problemId: string;
+    problemImageUrl: string;
+    onStart: () => void;
+    onSkip: () => void;
+}) {
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+            <div className="relative bg-white rounded-[2rem] shadow-2xl max-w-lg w-full overflow-hidden animate-fade-up">
+                {/* 상단 헤더 */}
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white text-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.15),transparent_50%)]" />
+                    <div className="relative z-10">
+                        <div className="text-4xl mb-2">🎉</div>
+                        <h2 className="text-xl font-black leading-tight">
+                            축하합니다!<br />
+                            문제가 오답노트 양식으로<br />
+                            변환될 준비가 되었습니다
+                        </h2>
+                    </div>
+                </div>
+
+                <div className="p-6">
+                    {/* PDF "반쪽짜리" 미리보기 */}
+                    <div className="flex gap-3 rounded-2xl overflow-hidden border border-slate-200 mb-5 shadow-inner bg-slate-50" style={{ height: 200 }}>
+                        {/* 왼쪽: 문제 이미지 (정상) */}
+                        <div className="flex-1 relative bg-white border-r border-slate-200 p-2 flex items-center justify-center">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={problemImageUrl}
+                                alt="등록한 문제"
+                                className="w-full h-full object-contain rounded-lg"
+                            />
+                            <div className="absolute bottom-2 left-2 bg-slate-900/80 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">문제</div>
+                        </div>
+
+                        {/* 오른쪽: 해설 영역 (blur 처리 - 반쪽짜리) */}
+                        <div className="flex-1 relative flex flex-col items-center justify-center gap-2 p-3 select-none">
+                            {/* blur 콘텐츠 */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-3 blur-[6px] opacity-40">
+                                <div className="w-3/4 h-3 bg-slate-300 rounded-full" />
+                                <div className="w-1/2 h-3 bg-slate-300 rounded-full" />
+                                <div className="w-2/3 h-3 bg-slate-300 rounded-full" />
+                                <div className="w-full h-16 bg-slate-200 rounded-xl mt-2" />
+                                <div className="w-3/4 h-3 bg-slate-300 rounded-full" />
+                            </div>
+                            {/* 중앙 오버레이 텍스트 */}
+                            <div className="relative z-10 text-center">
+                                <div className="text-slate-400 text-[10px] font-bold">✍️ 해설 영역</div>
+                                <div className="text-slate-300 text-[9px] mt-0.5">작성 후 완성</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 심리 자극 문구 */}
+                    <p className="text-slate-600 text-sm leading-relaxed text-center mb-5">
+                        여기에 손글씨 풀이만 추가하면,<br />
+                        <span className="font-black text-slate-900">세상에 하나뿐인 당신만의 오답 노트</span>가 완성됩니다.
+                    </p>
+
+                    {/* CTA 버튼 */}
+                    <button
+                        onClick={onStart}
+                        className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-base shadow-lg shadow-blue-500/30 hover:from-blue-700 hover:to-indigo-700 transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+                    >
+                        <span>✏️</span>
+                        <span>지금 30초 만에 해설 쓰고 완성하기</span>
+                        <span className="ml-1">→</span>
+                    </button>
+
+                    <button
+                        onClick={onSkip}
+                        className="w-full mt-2 py-2.5 text-slate-600 text-sm font-bold hover:text-slate-900 transition-colors underline underline-offset-2"
+                    >
+                        지금은 건너뛰고 대시보드로 →
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ============================================================
+// Main Page
+// ============================================================
 export default function UploadPage() {
     const router = useRouter();
 
@@ -24,10 +117,14 @@ export default function UploadPage() {
     const [preview, setPreview] = useState<string | null>(null);
     const [subject, setSubject] = useState<Subject>("수학1");
     const [selectedUnits, setSelectedUnits] = useState<string[]>([]);
-    const [importance, setImportance] = useState<number>(2); // 1~3
+    const [importance, setImportance] = useState<number>(2);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
+
+    // ✅ 등록 완료 팝업 상태
+    const [completedProblemId, setCompletedProblemId] = useState<string | null>(null);
+    const [completedImageUrl, setCompletedImageUrl] = useState<string | null>(null);
 
     function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -66,14 +163,12 @@ export default function UploadPage() {
                 .from("problems")
                 .getPublicUrl(filename);
 
-            // 3. DB에 문제 저장 (status를 saved 로 가정, schema 변경 필요 시 별도로 진행)
+            // 3. DB에 문제 저장
             const { data: insertedData, error: dbError } = await supabase.from("problems").insert({
                 user_id: user.id,
                 subject,
                 unit_tags: selectedUnits,
                 image_url: urlData.publicUrl,
-                // ✅ memo는 "해설/오답 포인트" 용도. 업로드 단계에서는 비워두고,
-                //    /problem/[id] 에서 사용자가 직접 해설을 작성하게 한다.
                 memo: "",
                 status: "saved",
                 importance: importance,
@@ -82,9 +177,10 @@ export default function UploadPage() {
 
             if (dbError) throw dbError;
 
-            // 추가: 바로 문제 풀이/해설 등록 화면으로 이동!
             if (insertedData?.id) {
-                router.push(`/problem/${insertedData.id}`);
+                // ✅ 등록 완료 팝업 표시 (바로 이동하지 않고 팝업 먼저)
+                setCompletedProblemId(insertedData.id);
+                setCompletedImageUrl(urlData.publicUrl);
             } else {
                 router.push("/dashboard");
             }
@@ -97,6 +193,16 @@ export default function UploadPage() {
 
     return (
         <div className="flex min-h-screen bg-slate-50 relative">
+            {/* ✅ 등록 완료 팝업 */}
+            {completedProblemId && completedImageUrl && (
+                <RegistrationSuccessPopup
+                    problemId={completedProblemId}
+                    problemImageUrl={completedImageUrl}
+                    onStart={() => router.push(`/problem/${completedProblemId}`)}
+                    onSkip={() => router.push("/dashboard")}
+                />
+            )}
+
             {/* 우상단 X 버튼 → 메인 랜딩 페이지로 */}
             <button
                 onClick={() => router.push("/")}

@@ -44,15 +44,21 @@ export async function GET(req: Request) {
   const preview = url.searchParams.get("preview") === "1";
   const subject = url.searchParams.get("subject") || undefined;
   const unit = url.searchParams.get("unit") || undefined;
+  const singleId = url.searchParams.get("single") || undefined;
 
   let q = supabase.from("problems").select("*").eq("user_id", session.user.id);
-  if (type === "test") q = q.in("status", ["saved", "review"]);
-  if (subject) q = q.eq("subject", subject);
-  if (unit) q = q.contains("unit_tags", [unit]);
+  if (singleId) {
+    // ✅ 단일 문제 모드: 특정 문제 1개만 PDF로 렌더링
+    q = q.eq("id", singleId);
+  } else {
+    if (type === "test") q = q.in("status", ["saved", "review"]);
+    if (subject) q = q.eq("subject", subject);
+    if (unit) q = q.contains("unit_tags", [unit]);
+  }
 
   const { data } = await q
     .order("created_at", { ascending: false })
-    .limit(preview ? 12 : 120);
+    .limit(singleId ? 1 : preview ? 12 : 120);
 
   const problems = (data ?? []) as Problem[];
 

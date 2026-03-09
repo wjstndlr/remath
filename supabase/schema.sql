@@ -23,11 +23,15 @@ CREATE TABLE IF NOT EXISTS problems (
 
 -- 2. 유저 프로필 테이블 (Pro 구독 상태 관리)
 CREATE TABLE IF NOT EXISTS profiles (
-  id                  UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  email               TEXT,
-  is_pro              BOOLEAN DEFAULT FALSE,
-  stripe_customer_id  TEXT,
-  created_at          TIMESTAMPTZ DEFAULT now()
+  id                      UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  email                   TEXT,
+  is_pro                  BOOLEAN DEFAULT FALSE,
+  stripe_customer_id      TEXT,
+  -- 해설(손글씨) 완성 누적 횟수: 1~3회 → 완성 축하 모달 표시
+  solution_complete_count INT DEFAULT 0,
+  -- 무료 PDF 인쇄 누적 횟수: 2회까지 무료, 3회부터 결제 유도
+  pdf_print_free_count    INT DEFAULT 0,
+  created_at              TIMESTAMPTZ DEFAULT now()
 );
 
 -- 3. 회원가입 시 자동으로 프로필 생성하는 트리거

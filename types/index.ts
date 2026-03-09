@@ -20,12 +20,11 @@ export interface Problem {
   unit_tags: string[]; // 단원 이름 배열
   image_url: string;
   memo?: string;
-  // (선택) 풀이 이미지 URL — 스키마에 solution_url 컬럼을 추가하면 깔끔하게 관리 가능
-  // 컬럼이 없다면, 코드가 memo에 URL을 fallback으로 붙입니다.
+  /** 풀이 이미지 URL (Supabase Storage) */
   solution_url?: string;
-  // (선택) 풀이 이미지 아래 추가 메모
+  /** 풀이 이미지 아래 추가 메모 */
   solution_memo?: string;
-  // (선택) 태블릿 손글씨 캔버스 스냅샷(이미지) URL
+  /** 태블릿 손글씨 캔버스 스냅샷(이미지) URL — handwriting_url NOT NULL = 해설 완료 */
   handwriting_url?: string;
   status: "saved" | "review" | "mastered"; // 저장완료 / 다시보기 / 마스터
   importance: number; // 1~5 별점 (중요도)
@@ -65,5 +64,9 @@ export interface UserProfile {
   email: string;
   is_pro: boolean;
   stripe_customer_id?: string;
+  /** 해설(손글씨) 완성 누적 횟수 */
+  solution_complete_count: number;
+  /** 무료 PDF 인쇄 누적 횟수 (2회까지 무료) */
+  pdf_print_free_count: number;
   created_at: string;
 }
