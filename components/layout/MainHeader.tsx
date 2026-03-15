@@ -14,6 +14,11 @@ export function MainHeader() {
   const [open, setOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
+  // PWA Install Prompt 상태
+  const [showPWA, setShowPWA] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -22,6 +27,46 @@ export function MainHeader() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
+
+  // PWA 설치 배너 로직
+  useEffect(() => {
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+      || (window.navigator as any).standalone;
+    if (isStandalone) return; // 이미 PWA로 실행 중
+    if (localStorage.getItem("pwaBannerDismissed") === "true") return;
+
+    const ua = window.navigator.userAgent.toLowerCase();
+    // iPadOS 13+ Safari는 UA에 "Macintosh"로 표시되므로 터치 지원 여부로 추가 판별
+    const iosDevice = /iphone|ipad|ipod/.test(ua)
+      || (ua.includes("macintosh") && navigator.maxTouchPoints > 1);
+    setIsIOS(iosDevice);
+
+    if (iosDevice) {
+      setShowPWA(true);
+    } else {
+      const handler = (e: Event) => {
+        e.preventDefault();
+        setDeferredPrompt(e);
+        setShowPWA(true);
+      };
+      window.addEventListener("beforeinstallprompt", handler);
+      return () => window.removeEventListener("beforeinstallprompt", handler);
+    }
+  }, []);
+
+  const handleInstallPWA = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") setShowPWA(false);
+      setDeferredPrompt(null);
+    }
+  };
+
+  const dismissPWA = () => {
+    setShowPWA(false);
+    localStorage.setItem("pwaBannerDismissed", "true");
+  };
 
   const logout = async () => {
     await supabase.auth.signOut();
@@ -32,13 +77,34 @@ export function MainHeader() {
 
   const handleFeedbackClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    setOpen(false); // 드로어에서 눌렀을 경우 닫기
+    setOpen(false);
     setFeedbackOpen(true);
   };
 
   return (
     <>
       <div className="sticky top-0 z-50 flex flex-col w-full">
+        {/* PWA 앱 설치 유도 배너 (초록색) */}
+        {showPWA && (
+          <div className="bg-emerald-600 text-white text-[11px] md:text-xs font-bold py-2.5 px-4 flex justify-center items-center gap-3 w-full relative">
+            <span className="shrink-0">📲</span>
+            {isIOS ? (
+              <span className="text-center leading-snug">
+                Safari 하단 <span className="inline-block mx-0.5 border border-white/40 rounded px-1 text-[10px]">⎋</span> 공유 버튼 → <strong>&apos;홈 화면에 추가&apos;</strong>로 앱처럼 사용하세요!
+              </span>
+            ) : (
+              <span>ReMath를 홈 화면에 추가하고 앱처럼 빠르게 사용하세요!</span>
+            )}
+            {!isIOS && deferredPrompt && (
+              <button onClick={handleInstallPWA} className="ml-1 px-3 py-1 bg-white text-emerald-700 rounded-lg text-[11px] font-black hover:bg-emerald-50 transition shrink-0">
+                설치하기
+              </button>
+            )}
+            <button onClick={dismissPWA} className="ml-2 text-white/60 hover:text-white transition shrink-0 text-sm">✕</button>
+          </div>
+        )}
+
+        {/* Beta 안내 배너 */}
         <div className="bg-slate-900 text-white text-[11px] md:text-xs font-bold py-2 px-4 flex justify-center items-center gap-2 w-full relative">
           <span className="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider">Beta</span>
           <span>현재 베타 기간 동안 모든 기능을 무료로 제공합니다!</span>

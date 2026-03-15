@@ -18,21 +18,18 @@ export default function LandingPage() {
 
           <div className="relative z-10 mx-auto max-w-7xl px-[var(--rm-pad-x)] flex flex-col items-center text-center">
             <div className="animate-fade-up">
-              <span className="inline-block px-4 py-1.5 rounded-full bg-slate-900 text-white text-[10px] font-bold tracking-widest uppercase mb-10 shadow-xl shadow-slate-900/20">
-                Premium Exam Strategy Platform
-              </span>
-              <h1 className="text-[clamp(42px,8vw,72px)] font-bold tracking-tighter text-slate-900 leading-[1.05] mb-8">
-                오답을 모아,<br />
-                <span className="text-blue-600">전략</span>으로 만듭니다.
+              <h1 className="text-[clamp(42px,8vw,72px)] font-bold tracking-tighter text-slate-900 leading-[1.05] mb-6 break-keep">
+                틀린 문제 <span className="text-blue-600">찍으면</span>,<br />
+                오답노트 완성.
               </h1>
-              <p className="max-w-2xl text-lg md:text-xl text-slate-400 font-semibold leading-relaxed mb-12 mx-auto">
-                단순히 문제를 다시 푸는 것이 아닙니다.<br />
-                당신이 수능장에서 펼칠 '필승의 한 수'를 준비하는 과정입니다.
+              <p className="max-w-xl text-lg md:text-xl text-slate-400 font-semibold leading-relaxed mb-12 mx-auto break-keep">
+                사진 저장 → 해설 작성 → 단원별 정리 → PDF 복습<br />
+                가위·풀 없이 5분이면 끝.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <Link href="/auth" className="w-full sm:w-auto px-12 py-5 rounded-full bg-slate-900 text-white font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl">
-                  무료로 시작하기
+                  내 오답노트 만들기
                 </Link>
                 <div className="flex items-center gap-4 text-left">
                   <div className="flex -space-x-3">
@@ -41,8 +38,8 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-slate-900">9.5만+ 수료생 누적</div>
-                    <div className="text-[9px] font-semibold text-slate-400">명문대 합격생들의 오답 전략</div>
+                    <div className="text-xs font-bold text-slate-900">베타 사용자 참여 중</div>
+                    <div className="text-[9px] font-semibold text-slate-400">오답 정리 시간 단축을 경험하세요</div>
                   </div>
                 </div>
               </div>
@@ -67,12 +64,12 @@ export default function LandingPage() {
         <section className="py-24 bg-white relative overflow-hidden">
           <div className="mx-auto max-w-7xl px-[var(--rm-pad-x)] relative z-10">
             <div className="text-center mb-20 max-w-2xl mx-auto space-y-4">
-              <h2 className="text-[clamp(26px,3.5vw,38px)] font-bold text-slate-900 tracking-tighter leading-tight">
+              <h2 className="text-[clamp(26px,3.5vw,38px)] font-bold text-slate-900 tracking-tighter leading-tight break-keep">
                 찍고, 쓰고, 뽑아내세요.<br />
-                <span className="text-blue-600">ReMath</span>가 오답노트를 자동 완성합니다.
+                오답 정리가 <span className="text-blue-600">5분</span>이면 끝납니다.
               </h2>
-              <p className="text-base text-slate-400 font-semibold">
-                가위와 풀 없이, 스마트폰 하나로 끝내는 나만의 수학 전략
+              <p className="text-base text-slate-400 font-semibold break-keep">
+                가위와 풀 없이, 스마트폰 하나로 끝내는 나만의 오답노트
               </p>
             </div>
 
@@ -225,13 +222,13 @@ export default function LandingPage() {
 
           <div className="mx-auto max-w-6xl px-[var(--rm-pad-x)]">
             <div className="text-center mb-24 space-y-6">
-              <h2 className="text-[clamp(32px,6vw,54px)] font-black text-slate-900 tracking-tighter leading-[1.1]">
-                당신의 오답은<br />
-                <span className="text-blue-600">‘전략’</span>으로 가공되고 있나요?
+              <h2 className="text-[clamp(32px,6vw,54px)] font-black text-slate-900 tracking-tighter leading-[1.1] break-keep">
+                오답노트 만드는 시간,<br />
+                <span className="text-blue-600">얼마나 걸리세요?</span>
               </h2>
-              <p className="text-base md:text-lg text-slate-400 font-bold max-w-xl mx-auto leading-relaxed">
-                복잡한 과정은 공부의 적입니다. 가위와 풀을 버리고 스마트하게.<br />
-                단 3번의 클릭으로, 오답은 완벽한 수능 자료가 됩니다.
+              <p className="text-base md:text-lg text-slate-400 font-bold max-w-xl mx-auto leading-relaxed break-keep">
+                가위질, 풀칠, 해설 베끼기… 이 과정에 보통 1시간.<br />
+                ReMath는 사진 한 장으로 5분 만에 끝냅니다.
               </p>
             </div>
 
@@ -277,16 +274,16 @@ export default function LandingPage() {
 
                 <div className="flex items-center gap-4 mb-10">
                   <div className="h-10 w-10 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-blue-500/30">NEW</div>
-                  <h3 className="text-lg font-black text-blue-400 italic tracking-tight">ReMath 스마트 전략</h3>
+                  <h3 className="text-lg font-black text-blue-400 italic tracking-tight">ReMath 스마트 오답 정리</h3>
                 </div>
 
                 <div className="flex-1 flex flex-col justify-between gap-6">
                   {[
-                    { icon: "📸", title: "스마트 촬영", sub: "폰으로 찍으면 즉시 DB화" },
-                    { icon: "✍️", title: "전략적 손글씨", sub: "태블릿에 바로 쓰고 정리" },
-                    { icon: "📄", title: "PDF 즉시 추출", sub: "시험 전 1초 만에 모음집 완성" },
-                    { icon: "🗂️", title: "영구적 보존", sub: "시간이 지나도 언제든 확인 가능" },
-                    { icon: "⚡", title: "압도적 효율", sub: "오직 공부에만 집중하는 환경" }
+                    { icon: "📸", title: "사진으로 즉시 저장", sub: "폰으로 찍으면 바로 오답 등록 완료" },
+                    { icon: "✍️", title: "손글씨 해설 작성", sub: "태블릿에 직접 쓰며 이해를 정리" },
+                    { icon: "📄", title: "PDF 시험지 출력", sub: "시험 전 내 오답만 모아 복습" },
+                    { icon: "🗂️", title: "단원별 자동 분류", sub: "수1, 수2, 미적분 단원별로 정리" },
+                    { icon: "⚡", title: "5분이면 끝", sub: "오답 정리에 1시간 쓰던 시절은 끝" }
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-4 p-5 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
                       <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-xl shadow-xl shadow-blue-500/20 group-hover:scale-110 transition-transform shrink-0">{item.icon}</div>
@@ -297,7 +294,7 @@ export default function LandingPage() {
                     </div>
                   ))}
                   <div className="mt-4 p-4 rounded-2xl bg-blue-500/10 border border-blue-400/20 text-blue-400 text-xs font-black text-center animate-pulse">
-                    “가장 단순한 것이 가장 강력합니다”
+                    "오답 정리는 짧게, 복습은 확실하게"
                   </div>
                 </div>
 
@@ -315,11 +312,11 @@ export default function LandingPage() {
         ========================================= */}
         <section className="py-32 bg-slate-900 border-y border-white/5 overflow-hidden">
           <div className="mx-auto max-w-7xl px-[var(--rm-pad-x)] mb-20 text-center">
-            <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-4">
-              수학 1등급 선배들의 리얼 후기
+            <h2 className="text-2xl md:text-3xl font-black text-white tracking-tighter mb-4 break-keep">
+              실제로 오답노트 시간을 줄인 학생들의 후기
             </h2>
             <p className="text-base text-slate-500 font-bold italic">
-              "따로 오답노트 만들 시간이 아까운 분들만 보세요."
+              "오답 정리에 시간 쓰기 아까운 분들만 보세요."
             </p>
           </div>
 
@@ -381,14 +378,14 @@ export default function LandingPage() {
           <div className="absolute -bottom-40 -left-20 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[100px]" />
 
           <div className="relative z-10 max-w-3xl px-[var(--rm-pad-x)] flex flex-col items-center">
-            <h2 className="text-[clamp(22px,4vw,42px)] font-bold text-slate-900 leading-[1.2] mb-10 tracking-tighter">
-              모르는 문제를 남겨두지 마세요.<br />
-              <span className="text-blue-600 italic font-bold">수학 1등급</span>은 오답에서 시작됩니다.
+            <h2 className="text-[clamp(22px,4vw,42px)] font-bold text-slate-900 leading-[1.2] mb-10 tracking-tighter break-keep">
+              틀린 문제를 그냥 넘기지 마세요.<br />
+              <span className="text-blue-600 italic font-bold">다시 안 틀리는 것</span>이 진짜 실력입니다.
             </h2>
             <Link href="/auth" className="px-12 py-5 rounded-full bg-slate-900 text-white font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl">
-              지금 바로 무료 시작하기
+              무료로 내 오답 정리 시작하기
             </Link>
-            <p className="mt-6 text-slate-400 font-semibold text-sm">가장 쉽고 강력한 수학 전략 도구, ReMath</p>
+            <p className="mt-6 text-slate-400 font-semibold text-sm">사진 찍고, 해설 쓰고, PDF로 복습. ReMath</p>
           </div>
         </section>
       </main>
