@@ -3,7 +3,7 @@
 // 로그인 / 회원가입 페이지
 // Magic Link 이메일 방식으로 간편 로그인
 // =============================================
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -20,6 +20,30 @@ function AuthPageInner() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+    const [isInAppBrowser, setIsInAppBrowser] = useState(false);
+    const [isIOSInApp, setIsIOSInApp] = useState(false);
+
+    // 앱 내 브라우저(WebView) 감지 → 안드로이드는 자동으로 Chrome 열기
+    useEffect(() => {
+        const ua = navigator.userAgent.toLowerCase();
+        const inApp = /kakaotalk|naver|instagram|fbav|fban|line|wv|webview|snapchat|twitter/i.test(ua)
+            || (ua.includes("safari") === false && /iphone|ipad|ipod/.test(ua));
+
+        if (!inApp) return;
+
+        const isIOS = /iphone|ipad|ipod/.test(ua)
+            || (ua.includes("macintosh") && navigator.maxTouchPoints > 1);
+
+        if (isIOS) {
+            // iOS는 intent:// 불가 → 안내 메시지 표시
+            setIsIOSInApp(true);
+            setIsInAppBrowser(true);
+        } else {
+            // 안드로이드: intent:// 로 Chrome 강제 실행
+            const currentURL = window.location.href;
+            window.location.href = `intent://${currentURL.replace(/https?:\/\//, "")}#Intent;scheme=https;package=com.android.chrome;end`;
+        }
+    }, []);
 
     async function handleEmailAuth() {
         if (!email || !password) {
@@ -63,6 +87,11 @@ function AuthPageInner() {
         });
     }
 
+    function copyURL() {
+        navigator.clipboard.writeText(window.location.href);
+        setMessage({ type: "success", text: "🔗 URL이 복사됐어요! Chrome이나 Safari에서 붙여넣기 하세요." });
+    }
+
     return (
         <div className="flex min-h-screen items-center justify-center bg-white px-4 relative">
             <Link
@@ -84,6 +113,24 @@ function AuthPageInner() {
                         회원가입 / 로그인
                     </h1>
                 </div>
+
+                {/* 인앱 브라우저 경고 */}
+                {isInAppBrowser && (
+                    <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-center">
+                        <p className="text-sm font-bold text-amber-800 mb-2">
+                            ⚠️ 앱 내 브라우저에서는 Google 로그인이 제한됩니다
+                        </p>
+                        <p className="text-xs text-amber-600 mb-3">
+                            Chrome 또는 Safari에서 열어주세요
+                        </p>
+                        <button
+                            onClick={copyURL}
+                            className="px-4 py-2 bg-amber-500 text-white text-xs font-bold rounded-lg hover:bg-amber-600 transition"
+                        >
+                            📋 URL 복사하기
+                        </button>
+                    </div>
+                )}
 
                 {!showEmailForm ? (
                     <div className="space-y-6">

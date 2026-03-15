@@ -17,7 +17,6 @@ export function MainHeader() {
   // PWA Install Prompt 상태
   const [showPWA, setShowPWA] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
     async function load() {
@@ -28,40 +27,29 @@ export function MainHeader() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  // PWA 설치 배너 로직
+  // PWA 설치 배너 로직 – 모바일/태블릿이면 무조건 표시
   useEffect(() => {
+    // 이미 홈 화면에서 실행 중이면 표시 안 함
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches
       || (window.navigator as any).standalone;
-    if (isStandalone) return; // 이미 PWA로 실행 중
+    if (isStandalone) return;
+
+    // 이전에 닫았으면 표시 안 함
     if (localStorage.getItem("pwaBannerDismissed") === "true") return;
 
+    // 모바일/태블릿 감지 (터치 지원 + 화면 크기 또는 UA)
     const ua = window.navigator.userAgent.toLowerCase();
-    // iPadOS 13+ Safari는 UA에 "Macintosh"로 표시되므로 터치 지원 여부로 추가 판별
+    const isMobileOrTablet = /android|iphone|ipad|ipod|mobile|tablet/.test(ua)
+      || (ua.includes("macintosh") && navigator.maxTouchPoints > 1) // iPadOS
+      || (navigator.maxTouchPoints > 0 && window.innerWidth <= 1366); // 터치 가능한 태블릿 크기
+
+    if (!isMobileOrTablet) return; // PC에서는 안 띄움
+
     const iosDevice = /iphone|ipad|ipod/.test(ua)
       || (ua.includes("macintosh") && navigator.maxTouchPoints > 1);
     setIsIOS(iosDevice);
-
-    if (iosDevice) {
-      setShowPWA(true);
-    } else {
-      const handler = (e: Event) => {
-        e.preventDefault();
-        setDeferredPrompt(e);
-        setShowPWA(true);
-      };
-      window.addEventListener("beforeinstallprompt", handler);
-      return () => window.removeEventListener("beforeinstallprompt", handler);
-    }
+    setShowPWA(true);
   }, []);
-
-  const handleInstallPWA = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") setShowPWA(false);
-      setDeferredPrompt(null);
-    }
-  };
 
   const dismissPWA = () => {
     setShowPWA(false);
@@ -84,21 +72,16 @@ export function MainHeader() {
   return (
     <>
       <div className="sticky top-0 z-50 flex flex-col w-full">
-        {/* PWA 앱 설치 유도 배너 (초록색) */}
+        {/* PWA 앱 설치 유도 배너 (초록색) – 모바일/태블릿에서만 표시 */}
         {showPWA && (
           <div className="bg-emerald-600 text-white text-[11px] md:text-xs font-bold py-2.5 px-4 flex justify-center items-center gap-3 w-full relative">
             <span className="shrink-0">📲</span>
             {isIOS ? (
               <span className="text-center leading-snug">
-                Safari 하단 <span className="inline-block mx-0.5 border border-white/40 rounded px-1 text-[10px]">⎋</span> 공유 버튼 → <strong>&apos;홈 화면에 추가&apos;</strong>로 앱처럼 사용하세요!
+                하단 <span className="inline-block mx-0.5 border border-white/40 rounded px-1 text-[10px]">⎋</span> 공유 → <strong>&apos;홈 화면에 추가&apos;</strong>로 앱처럼 사용!
               </span>
             ) : (
-              <span>ReMath를 홈 화면에 추가하고 앱처럼 빠르게 사용하세요!</span>
-            )}
-            {!isIOS && deferredPrompt && (
-              <button onClick={handleInstallPWA} className="ml-1 px-3 py-1 bg-white text-emerald-700 rounded-lg text-[11px] font-black hover:bg-emerald-50 transition shrink-0">
-                설치하기
-              </button>
+              <span>브라우저 메뉴(⋮) → <strong>&apos;홈 화면에 추가&apos;</strong>로 앱처럼 사용!</span>
             )}
             <button onClick={dismissPWA} className="ml-2 text-white/60 hover:text-white transition shrink-0 text-sm">✕</button>
           </div>
