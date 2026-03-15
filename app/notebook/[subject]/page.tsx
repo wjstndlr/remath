@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -9,7 +9,7 @@ import { MainHeader } from "@/components/layout/MainHeader";
 import NotebookFlip from "@/components/notebook/NotebookFlip";
 import type { Problem, Subject, UserProfile } from "@/types";
 
-export default function NotebookBySubjectPage({ params }: { params: { subject: Subject } }) {
+function NotebookSubjectPageInner({ params }: { params: { subject: Subject } }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -116,5 +116,13 @@ export default function NotebookBySubjectPage({ params }: { params: { subject: S
         )}
       </main>
     </div>
+  );
+}
+
+export default function NotebookSubjectPage({ params }: { params: { subject: Subject } }) {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <NotebookSubjectPageInner params={params} />
+    </Suspense>
   );
 }

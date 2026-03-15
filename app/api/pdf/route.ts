@@ -45,20 +45,24 @@ export async function GET(req: Request) {
   const subject = url.searchParams.get("subject") || undefined;
   const unit = url.searchParams.get("unit") || undefined;
   const singleId = url.searchParams.get("single") || undefined;
+  const statusParam = url.searchParams.get("status") || undefined;
 
   let q = supabase.from("problems").select("*").eq("user_id", session.user.id);
   if (singleId) {
     // ✅ 단일 문제 모드: 특정 문제 1개만 PDF로 렌더링
     q = q.eq("id", singleId);
   } else {
-    if (type === "test") q = q.in("status", ["saved", "review"]);
+    if (type === "test") {
+      if (statusParam) q = q.eq("status", statusParam);
+      else q = q.in("status", ["saved", "review"]);
+    }
     if (subject) q = q.eq("subject", subject);
     if (unit) q = q.contains("unit_tags", [unit]);
   }
 
   const { data } = await q
     .order("created_at", { ascending: false })
-    .limit(singleId ? 1 : preview ? 12 : 120);
+    .limit(singleId ? 1 : 120); // 미리보기도 120개 가져옴 (제한 해제)
 
   const problems = (data ?? []) as Problem[];
 
@@ -67,8 +71,8 @@ export async function GET(req: Request) {
     (type === "notebook" ? "오답노트" : "재시험") +
     (preview ? " PDF 미리보기" : " PDF");
 
-  // ✅ 미리보기 제한: 2문제까지만 정상
-  const LIMIT = 2;
+  // ✅ 제한 해제
+  const LIMIT = 9999;
 
   function headerHtml(p: Problem, idx: number) {
     const tags = `${p.subject} | ${(p.unit_tags || []).join(" · ")}`;
@@ -91,7 +95,7 @@ export async function GET(req: Request) {
   }
 
   function notebookSheet(p: Problem, idx: number) {
-    const locked = preview && idx >= LIMIT;
+    const locked = false; // 제한 없음
 
     const memo = ((p.memo || "") as string).trim();
     const solutionUrl = (p as any).solution_url as string | null;
@@ -174,8 +178,8 @@ export async function GET(req: Request) {
     const leftIdx = startProblemIndex;
     const rightIdx = startProblemIndex + 1;
 
-    const leftLocked = preview && leftIdx >= LIMIT;
-    const rightLocked = preview && rightIdx >= LIMIT;
+    const leftLocked = false;
+    const rightLocked = false;
 
     const cell = (p: Problem | null, idx: number, locked: boolean) => {
       if (!p) return `<div class="testCell empty"></div>`;
@@ -511,17 +515,8 @@ export async function GET(req: Request) {
   ${preview ? `<div class="watermark">REMATH PREVIEW</div>` : ""}
   <button class="close-btn" onclick="window.close()" title="닫기">✕</button>
 
-  ${preview ? `
-    <div class="pro-overlay" id="proOverlay" aria-hidden="true">
-      <div class="pro-card">
-        <div class="lock">🔒</div>
-        <h2>여기부터는 PRO 전용이에요</h2>
-        <p>미리보기는 <b>2문제</b>까지만 볼 수 있어요.<br/>PRO로 업그레이드하면 <b>전체 PDF 무제한 출력</b>이 가능해요.</p>
-        <button class="pro-btn" onclick="window.open('/plans','_blank')">⚡ PRO로 전체 보기</button>
-        <button class="dismiss-btn" onclick="document.getElementById('proOverlay').classList.remove('visible')">일단 닫기</button>
-      </div>
-    </div>
-  ` : ""}
+  ${preview ? `<div class="watermark">REMATH PREVIEW</div>` : ""}
+  <button class="close-btn" onclick="window.close()" title="닫기">✕</button>
 
   <div class="wrap">
     <div class="screenTop">
@@ -629,30 +624,10 @@ export async function GET(req: Request) {
     }
 
     // ============================================================
-    // ✅ PRO 유도: 3번째 콘텐츠가 화면에 들어오면 overlay 노출
+    // ✅ PRO 유도: 베타라서 삭제
     // ============================================================
     function setupProGate() {
-      if (!IS_PREVIEW) return;
-      const overlay = document.getElementById('proOverlay');
-      if (!overlay) return;
-
-      const thirdIndex = LIMIT; // 0-based: 2 => 3번째
-      const third = document.querySelector('[data-index="' + thirdIndex + '"]');
-      if (!third) return;
-
-      let shown = false;
-      const check = () => {
-        if (shown) return;
-        const r = third.getBoundingClientRect();
-        if (r.top < window.innerHeight * 0.6) {
-          overlay.classList.add('visible');
-          shown = true;
-        }
-      };
-
-      window.addEventListener('scroll', check, { passive: true });
-      setTimeout(check, 300);
-      setTimeout(check, 800);
+      // do nothing
     }
 
     function onReady(cb) {

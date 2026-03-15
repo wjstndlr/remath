@@ -1,16 +1,17 @@
 import Link from "next/link";
 import { MainHeader } from "@/components/layout/MainHeader";
+import { FeedbackCTABar } from "@/components/ui/FeedbackCTABar";
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--light-bg)] overflow-x-hidden">
+    <div className="flex min-h-screen flex-col bg-[var(--light-bg)]">
       <MainHeader />
       <main className="flex-1 w-full">
         {/* =========================================
             1. HERO SECTION – 압도적 첫인상
         ========================================= */}
-        <section className="relative min-h-screen flex items-center justify-center pt-24 pb-12 overflow-hidden border-b border-slate-50">
-          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <section className="relative min-h-screen flex items-center justify-center pt-24 pb-12 border-b border-slate-50">
+          <div className="absolute inset-0 z-0 pointer-events-none">
             <div className="absolute top-[10%] left-[-10%] w-[50%] h-[50%] bg-blue-50/50 rounded-full blur-[160px]" />
             <div className="absolute bottom-[20%] right-[-10%] w-[40%] h-[40%] bg-indigo-50/50 rounded-full blur-[160px]" />
           </div>
@@ -355,73 +356,27 @@ export default function LandingPage() {
         {/* =========================================
             5. PRICING & FAQ – 수학 1등급을 위한 선택
         ========================================= */}
-        <section id="pricing" className="py-32 bg-white">
+        <section id="beta-feedback" className="py-32 bg-white">
           <div className="mx-auto max-w-4xl px-[var(--rm-pad-x)]">
             <div className="text-center mb-16">
+              <span className="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-4">Beta Version</span>
               <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tighter mb-4">
-                당신의 수학 1등급을 위한 투자
+                현재 모든 기능을 무료로 제공합니다
               </h2>
-              <p className="text-base text-slate-400 font-semibold">지금 시작하면 이번 중간고사 성적이 달라집니다.</p>
+              <p className="text-base text-slate-500 font-semibold max-w-xl mx-auto">
+                ReMath는 더 나은 서비스를 만들기 위해 베타 테스트를 진행 중입니다. <br className="hidden md:block" />
+                여러분의 소중한 의견이 수학 1등급을 위한 서비스로 성장하는 밑거름이 됩니다.
+              </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 items-stretch mb-32">
-              <div className="p-10 rounded-[3rem] bg-slate-50 border border-slate-100 flex flex-col hover:shadow-lg transition-all">
-                <h3 className="text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Basic</h3>
-                <div className="text-4xl font-bold text-slate-900 mb-8">₩0 <span className="text-xs opacity-30 font-medium">/ 평생 소장</span></div>
-                <ul className="space-y-4 mb-10 flex-1">
-                  {['무제한 수학 수식 촬영', '과목/단원 자동 분류', '태블릿 무한 필기 지원'].map(f => (
-                    <li key={f} className="flex gap-3 items-center text-sm font-medium text-slate-500">
-                      <span className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-600">✓</span> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/auth" className="w-full py-5 rounded-2xl bg-slate-200 text-slate-600 font-bold text-center hover:bg-slate-300 transition-all">무료로 시작</Link>
-              </div>
-
-              <div className="p-10 rounded-[3rem] bg-blue-600 text-left flex flex-col relative shadow-2xl hover:scale-[1.02] transition-transform">
-                <div className="absolute -top-4 right-10 bg-white text-blue-600 text-[10px] font-bold px-5 py-2 rounded-full uppercase shadow-xl">Most Popular</div>
-                <h3 className="text-sm font-bold text-blue-100 mb-2 uppercase tracking-widest">Pro</h3>
-                <div className="text-4xl font-bold text-white mb-8">₩6,900 <span className="text-xs opacity-50 font-medium">/ 월 구독</span></div>
-                <ul className="space-y-4 mb-10 flex-1">
-                  {['취약 유형 맞춤 PDF 인쇄', 'AI 기출 변형 유사 문항', '1:1 정밀 성적 분석 리포트', '모든 디바이스 실시간 동기화'].map(f => (
-                    <li key={f} className="flex gap-3 items-center text-sm font-medium text-white">
-                      <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] text-white">✓</span> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/upgrade" className="w-full py-5 rounded-2xl bg-white text-blue-600 font-bold text-center hover:bg-slate-50 transition-all">Pro로 시작하기</Link>
-              </div>
-            </div>
-
-            {/* FAQ */}
-            <div className="mx-auto max-w-3xl text-left bg-slate-50 rounded-[3rem] p-12 border border-slate-100">
-              <h3 className="text-2xl font-bold text-slate-900 mb-10 flex items-center gap-4">
-                <span className="w-8 h-1 bg-blue-600 rounded-full" /> 자주 묻는 질문
-              </h3>
-              <div className="space-y-8">
-                {[
-                  { q: "수학 수식 인식이 정말 잘 되나요?", a: "ReMath는 복잡한 분수, 로그, 미적분 기호까지 지원하는 전용 OCR 기술을 탑재하고 있습니다. 손글씨 풀이도 깔끔하게 저장됩니다." },
-                  { q: "모의고사 기출 분석 기능은 무엇인가요?", a: "평가원 및 교육청 기출 데이터베이스를 기반으로, 내가 틀린 문제와 유사한 유형의 변형 문제를 생성하여 완벽한 복습을 돕는 기능입니다." },
-                  { q: "오답 PDF 인쇄 설정이 가능한가요?", a: "네! 실제 수능 시험지 양식부터 일반 문제집 양식까지 다양하게 선택하여 나만의 시험지를 만드실 수 있습니다." }
-                ].map((faq, i) => (
-                  <div key={i} className="space-y-2">
-                    <div className="text-lg font-bold text-slate-900 flex gap-3">
-                      <span className="text-blue-600">Q.</span> {faq.q}
-                    </div>
-                    <p className="text-slate-500 font-medium leading-relaxed pl-8 text-sm">
-                      {faq.a}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <FeedbackCTABar />
           </div>
         </section>
 
         {/* =========================================
             6. FINAL CTA – 수학 성공의 첫걸음
         ========================================= */}
-        <section className="relative py-48 flex flex-col items-center text-center bg-slate-50 overflow-hidden">
+        <section className="relative py-48 flex flex-col items-center text-center bg-slate-50">
           <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white to-transparent" />
           <div className="absolute -bottom-40 -left-20 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[100px]" />
 

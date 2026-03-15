@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { usePathname, useRouter } from "next/navigation";
+import { FeedbackModal } from "@/components/ui/FeedbackModal";
 
 export function MainHeader() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export function MainHeader() {
 
   const [email, setEmail] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -28,44 +30,63 @@ export function MainHeader() {
     router.push("/");
   };
 
+  const handleFeedbackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setOpen(false); // 드로어에서 눌렀을 경우 닫기
+    setFeedbackOpen(true);
+  };
+
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-[var(--rm-pad-x)] h-[clamp(60px,8vh,72px)]">
-          <Link href="/" className="flex items-center gap-2 pr-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-xs font-black text-white shadow-sm shadow-slate-900/20">
-              R
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
-              <span className="text-base font-black text-slate-900 tracking-tight">ReMath</span>
-              <span className="hidden sm:inline text-[9px] font-black text-slate-400 uppercase tracking-tighter">오답노트</span>
-            </div>
-          </Link>
-
-          <nav className="flex items-center gap-2 text-sm">
-            <Link href="/upload" className="flex items-center justify-center px-4 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition">
-              📷 <span className="hidden sm:inline ml-1">오답 등록</span>
-            </Link>
-            <Link href="/dashboard" className="flex items-center justify-center px-4 h-10 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-bold transition">
-              책장
-            </Link>
-            <Link href="/session/today" className="flex items-center justify-center px-4 h-10 rounded-xl bg-action text-white font-bold hover:bg-blue-600 transition shadow-lg shadow-blue-500/20">
-              재시험
-            </Link>
-
-            <button
-              onClick={() => setOpen(true)}
-              className="ml-1 p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-              </svg>
-            </button>
-          </nav>
+      <div className="sticky top-0 z-50 flex flex-col w-full">
+        <div className="bg-slate-900 text-white text-[11px] md:text-xs font-bold py-2 px-4 flex justify-center items-center gap-2 w-full relative">
+          <span className="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider">Beta</span>
+          <span>현재 베타 기간 동안 모든 기능을 무료로 제공합니다!</span>
+          <button onClick={handleFeedbackClick} className="ml-2 underline text-blue-300 hover:text-white transition">문의/피드백 보내기 &rarr;</button>
         </div>
-      </header>
+        <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md w-full relative">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-[var(--rm-pad-x)] h-[clamp(60px,8vh,72px)]">
+            <Link href="/" className="flex items-center gap-2 pr-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-xs font-black text-white shadow-sm shadow-slate-900/20">
+                R
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
+                <span className="text-base font-black text-slate-900 tracking-tight">ReMath</span>
+                <span className="hidden sm:inline text-[9px] font-black text-slate-400 uppercase tracking-tighter">오답노트</span>
+              </div>
+            </Link>
+
+            <nav className="flex items-center gap-2 text-sm">
+              <Link href="/upload" className="flex items-center justify-center px-4 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition">
+                📷 <span className="hidden sm:inline ml-1">오답 등록</span>
+              </Link>
+              <Link href="/dashboard" className="flex items-center justify-center px-4 h-10 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-bold transition">
+                책장
+              </Link>
+              <Link href="/session/today" className="flex items-center justify-center px-4 h-10 rounded-xl bg-action text-white font-bold hover:bg-blue-600 transition shadow-lg shadow-blue-500/20">
+                재시험
+              </Link>
+
+              <button
+                onClick={() => setOpen(true)}
+                className="ml-1 p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </header>
+      </div>
+
+      <FeedbackModal
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        userEmail={email}
+      />
 
       {/* 콴다 스타일 사이드 드로어 메뉴 */}
       {open && (
@@ -100,18 +121,28 @@ export function MainHeader() {
               {[
                 { label: '홈', icon: '🏠', href: '/' },
                 { label: '나의 오답 책장', icon: '📚', href: '/dashboard' },
-                { label: '프리미엄 결제하기', icon: '✨', href: '/#pricing' },
-                { label: '설정', icon: '⚙️', href: '#' },
+                { label: '의견/버그 제보', icon: '💬', onClick: handleFeedbackClick },
               ].map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-4 px-4 py-4 rounded-2xl text-[15px] font-bold text-slate-700 hover:bg-slate-50 transition"
-                >
-                  <span className="text-xl">{item.icon}</span>
-                  {item.label}
-                </Link>
+                item.href ? (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-4 px-4 py-4 rounded-2xl text-[15px] font-bold text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    <span className="text-xl">{item.icon}</span>
+                    {item.label}
+                  </Link>
+                ) : (
+                  <button
+                    key={item.label}
+                    onClick={item.onClick}
+                    className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-[15px] font-bold text-slate-700 hover:bg-slate-50 transition text-left"
+                  >
+                    <span className="text-xl">{item.icon}</span>
+                    {item.label}
+                  </button>
+                )
               ))}
             </div>
 

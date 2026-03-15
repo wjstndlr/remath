@@ -165,6 +165,7 @@ export default function DashboardPage() {
     const router = useRouter();
     const [problems, setProblems] = useState<Problem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [dueTodayCount, setDueTodayCount] = useState(0);
 
     const SUBJECTS = ["수학1", "수학2", "미적분", "확통", "기하"];
     const BOOK_COLORS: Record<string, string> = {
@@ -190,6 +191,22 @@ export default function DashboardPage() {
                 .order("created_at", { ascending: false });
 
             setProblems((data ?? []) as Problem[]);
+
+            // ✅ 에빙하우스 오늘 복습 개수 계산
+            const now = new Date().getTime();
+            const DAY = 24 * 60 * 60 * 1000;
+            const due = (data ?? []).filter((p: any) => {
+                if (!p.last_tried_at) return true;
+                const timeDiff = now - new Date(p.last_tried_at).getTime();
+                const daysDiff = timeDiff / DAY;
+                const is1Day = Math.abs(daysDiff - 1) <= 0.5;
+                const is3Days = Math.abs(daysDiff - 3) <= 0.5;
+                const is7Days = Math.abs(daysDiff - 7) <= 0.5;
+                const is14PlusDays = daysDiff >= 13.5;
+                return is1Day || is3Days || is7Days || is14PlusDays || p.status === 'review';
+            }).length;
+            setDueTodayCount(due);
+
             setLoading(false);
         }
         load();
@@ -276,10 +293,21 @@ export default function DashboardPage() {
                             <Link href="/session/today" className="block w-full mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-4 shadow-lg hover:shadow-[0_8px_30px_rgb(79,70,229,0.3)] transition-all transform hover:-translate-y-0.5 group">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl shadow-inner">🔥</div>
+                                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl shadow-inner relative">
+                                            🔥
+                                            {dueTodayCount > 0 && (
+                                                <div className="absolute -top-2 -right-2 bg-red-500 text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-indigo-600 shadow-lg">
+                                                    {dueTodayCount}
+                                                </div>
+                                            )}
+                                        </div>
                                         <div>
                                             <div className="font-black text-lg">통합 재시험 시작하기</div>
-                                            <div className="text-xs text-blue-100 font-medium mt-0.5">저장된 모든 오답을 섞어서 다시 풀어보세요</div>
+                                            {dueTodayCount > 0 ? (
+                                                <div className="text-xs text-blue-100 font-bold mt-0.5 animate-pulse">오늘 꼭 복습해야 할 오답이 {dueTodayCount}개 있어요! ⚡️</div>
+                                            ) : (
+                                                <div className="text-xs text-blue-100 font-medium mt-0.5">저장된 모든 오답을 섞어서 다시 풀어보세요</div>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center font-bold transition-transform group-hover:translate-x-1 border border-white/20">→</div>
@@ -389,6 +417,8 @@ export default function DashboardPage() {
                     </>
                 )}
             </main>
+
+
         </div>
     );
 }
