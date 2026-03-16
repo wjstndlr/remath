@@ -25,7 +25,9 @@ export interface Problem {
   /** 풀이 이미지 아래 추가 메모 */
   solution_memo?: string;
   /** 태블릿 손글씨 캔버스 스냅샷(이미지) URL — handwriting_url NOT NULL = 해설 완료 */
-  handwriting_url?: string;
+  handwriting_url?: string | null;
+  /** 태블릿 손글씨 펜 선 데이터 (JSON) — 수정 복원용 */
+  handwriting_json?: any | null;
   status: "saved" | "review" | "mastered"; // 저장완료 / 다시보기 / 마스터
   importance: number; // 1~5 별점 (중요도)
   solve_count: number; // 재시험 시도 횟수

@@ -149,10 +149,10 @@ export default function ProblemDetailPage({ params }: { params: { id: string } }
     };
 
     // ✅ 캔버스 저장 대기
-    const waitCanvasSave = async (problemId: string): Promise<string | null> => {
+    const waitCanvasSave = async (problemId: string): Promise<{ url: string | null; json: any } | null> => {
         return new Promise((resolve, reject) => {
             let done = false;
-            const safeResolve = (v: string | null) => { if (done) return; done = true; resolve(v); };
+            const safeResolve = (v: { url: string | null; json: any } | null) => { if (done) return; done = true; resolve(v); };
             const safeReject = (err: any) => { if (done) return; done = true; reject(err); };
 
             window.dispatchEvent(
@@ -313,17 +313,29 @@ export default function ProblemDetailPage({ params }: { params: { id: string } }
             }
 
             // ✅ 손글씨 저장(완료까지 await)
-            const handwritingUrl = await waitCanvasSave(problem.id);
-            if (handwritingUrl) {
-                setProblem(prev => prev ? { ...prev, handwriting_url: handwritingUrl } : prev);
+            const canvasData = await waitCanvasSave(problem.id);
+            let handwritingUrl: string | null = problem.handwriting_url || null;
+            let handwritingJson = problem.handwriting_json;
+
+            if (canvasData) {
+                handwritingUrl = canvasData.url; // string | null
+                handwritingJson = canvasData.json;
+                
+                // DB 업데이트 (이미지와 JSON 동시에)
+                await supabase.from("problems").update({ 
+                    handwriting_url: handwritingUrl,
+                    handwriting_json: handwritingJson
+                }).eq("id", problem.id);
+
+                setProblem(prev => prev ? { ...prev, handwriting_url: handwritingUrl, handwriting_json: handwritingJson } : prev);
             }
 
             // Dirty 스냅샷 갱신
             initialRef.current = {
                 memo: memoDraft ?? "",
                 solutionMemo: solutionMemoDraft ?? "",
-                solutionUrl: problem.solution_url ?? "",
-                handwritingUrl: handwritingUrl ?? (problem.handwriting_url ?? ""),
+                solutionUrl: (problem.solution_url || solutionPreview) ? (problem.solution_url || "") : "",
+                handwritingUrl: handwritingUrl || "",
             };
             setCanvasDirty(false);
             setSaveAllBtn("저장완료");
@@ -545,7 +557,11 @@ export default function ProblemDetailPage({ params }: { params: { id: string } }
             {/* 우측 캔버스 */}
             <div className="flex-1 h-full relative bg-[#F3F4F6] overflow-hidden flex flex-col shadow-inner">
                 <div className="absolute inset-0 pattern-dots border-slate-200 pointer-events-none opacity-40" />
-                <InfiniteCanvas problemId={params.id} onToast={showToast} />
+                <InfiniteCanvas 
+                    problemId={params.id} 
+                    initialData={problem.handwriting_json}
+                    onToast={showToast} 
+                />
             </div>
 
             {/* 이미지 확대 모달 */}

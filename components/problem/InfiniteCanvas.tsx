@@ -31,9 +31,11 @@ type Snapshot = {
 
 export default function InfiniteCanvas({
   problemId,
+  initialData,
   onToast,
 }: {
   problemId: string;
+  initialData?: Snapshot | null;
   onToast?: (msg: string) => void;
 }) {
   const stageRef = useRef<any>(null);
@@ -161,15 +163,22 @@ export default function InfiniteCanvas({
   // =========================
   useEffect(() => {
     // 1. 데이터 로드 (mount 시 1회)
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.lines) setLines(parsed.lines);
-        if (parsed.texts) setTexts(parsed.texts);
-        console.log("✅ [Canvas] 로컬 데이터 로드 완료");
-      } catch (e) {
-        console.error("❌ [Canvas] 로컬 데이터 파싱 에러", e);
+    // ✅ 서버 데이터(initialData)가 있으면 우선순위, 없으면 로컬스토리지 fallback
+    if (initialData) {
+      if (initialData.lines) setLines(initialData.lines);
+      if (initialData.texts) setTexts(initialData.texts);
+      console.log("✅ [Canvas] 서버 데이터 로드 완료");
+    } else {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.lines) setLines(parsed.lines);
+          if (parsed.texts) setTexts(parsed.texts);
+          console.log("✅ [Canvas] 로컬 데이터 로드 완료");
+        } catch (e) {
+          console.error("❌ [Canvas] 로컬 데이터 파싱 에러", e);
+        }
       }
     }
 
@@ -203,7 +212,7 @@ export default function InfiniteCanvas({
         window.removeEventListener("resize", applySize);
       };
     }
-  }, [problemId, STORAGE_KEY]);
+  }, [problemId, STORAGE_KEY, initialData]);
 
   // localStorage autosave
   useEffect(() => {
@@ -268,8 +277,8 @@ export default function InfiniteCanvas({
     };
   };
 
-  // ☁️ 클라우드 저장 (원본 그대로)
-  const saveToCloud = async (): Promise<string | null> => {
+  // ☁️ 클라우드 저장 (원본 그대로 + JSON 반환 추가)
+  const saveToCloud = async (): Promise<{ url: string | null; json: Snapshot | null }> => {
     console.log("🚀 [Canvas Save] 저장 프로세스 시작...");
     try {
       setCloudSaving(true);
@@ -280,7 +289,6 @@ export default function InfiniteCanvas({
         console.error("❌ [Canvas Save] 로그인된 사용자가 없습니다.");
         throw new Error("로그인이 필요합니다.");
       }
-      console.log("👤 [Canvas Save] 사용자 확인:", user.id);
 
       const stage = stageRef.current;
       if (!stage) {
@@ -291,24 +299,7 @@ export default function InfiniteCanvas({
       const bounds = getContentBounds();
       if (!bounds) {
         console.warn("⚠️ [Canvas Save] 빈 캔버스 → handwriting_url 제거(DB 반영)");
-
-        // ✅ 초기화/백지 상태를 "해설 없음"으로 DB에 반영
-        const { error: clearErr } = await supabase
-          .from("problems")
-          .update({ handwriting_url: null })
-          .eq("id", problemId);
-
-        if (clearErr) {
-          console.error("❌ [Canvas Save] handwriting_url 제거 실패:", clearErr);
-          throw clearErr;
-        }
-
-        onToast?.("손글씨가 제거되었습니다.");
-        window.dispatchEvent(
-          new CustomEvent("remath_canvas_saved", { detail: { problemId, url: null } })
-        );
-
-        return null;
+        return { url: null, json: null };
       }
 
       console.log("📸 [Canvas Save] 이미지 스냅샷 생성 중...", bounds);
@@ -327,29 +318,19 @@ export default function InfiniteCanvas({
         console.error("❌ [Canvas Save] 스토리지 업로드 실패:", upErr);
         throw upErr;
       }
-      console.log("✅ [Canvas Save] 스토리지 업로드 성공");
 
       const { data: urlData } = supabase.storage.from("solutions").getPublicUrl(filename);
-      // 🔥 캐시 브레이킹 (재수정 시 PDF 및 오답노트에 즉시 반영되도록 타임스탬프 추가)
       const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-      console.log("🔗 [Canvas Save] 공개 URL 생성됨:", publicUrl);
-
-      console.log("💾 [Canvas Save] DB 테이블 업데이트 시도 (problems)...");
-      const { error: dbErr } = await supabase.from("problems").update({ handwriting_url: publicUrl }).eq("id", problemId);
-
-      if (dbErr) {
-        console.error("❌ [Canvas Save] DB 업데이트 실패 (RLS 정책 확인 필요):", dbErr);
-        throw dbErr;
-      }
+      const json = { lines, texts };
 
       console.log("🎉 [Canvas Save] 모든 저장 프로세스 완료!");
       onToast?.("손글씨가 저장되었습니다.");
-      window.dispatchEvent(new CustomEvent("remath_canvas_saved", { detail: { problemId, url: publicUrl } }));
-      return publicUrl;
+
+      return { url: publicUrl, json };
     } catch (e: any) {
       console.error("🚨 [Canvas Save] 최종 에러 발생:", e);
       onToast?.(`저장 실패: ${e.message}`);
-      return null;
+      return { url: null, json: null };
     } finally {
       setCloudSaving(false);
     }
@@ -366,8 +347,8 @@ export default function InfiniteCanvas({
       const reject = e?.detail?.reject;
 
       try {
-        const url = await saveToCloud();
-        resolve?.(url);
+        const result = await saveToCloud();
+        resolve?.(result); // { url, json } 반환
       } catch (err) {
         reject?.(err);
       }
