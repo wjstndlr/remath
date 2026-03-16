@@ -109,42 +109,7 @@ function CompletionModal({
     );
 }
 
-// ============================================================
-// PaymentModal — PDF 유료 인쇄 유도
-// ============================================================
-function PaymentModal({ onClose }: { onClose: () => void }) {
-    const router = useRouter();
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="relative bg-white rounded-2xl shadow-2xl w-[min(360px,90vw)] overflow-hidden">
-                <div className="bg-gradient-to-br from-slate-900 to-slate-800 px-5 py-6 text-center">
-                    <div className="text-4xl mb-3">🔒</div>
-                    <h2 className="text-lg font-black text-white leading-snug">
-                        무료 인쇄 횟수를<br />모두 사용했어요
-                    </h2>
-                    <p className="text-slate-400 text-xs font-medium mt-2">
-                        무료 PDF 인쇄는 <b className="text-white">2회</b>까지 제공돼요.<br />
-                        PRO로 업그레이드하면 <b className="text-amber-400">무제한 PDF 인쇄</b> 가능.
-                    </p>
-                </div>
-                <div className="p-4 space-y-2">
-                    <button
-                        onClick={() => router.push("/plans")}
-                        className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-black text-sm shadow-md"
-                    >
-                        ⚡ PRO로 업그레이드
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="w-full py-2 text-slate-400 text-xs font-medium hover:text-slate-600"
-                    >
-                        닫기
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}
+// (PaymentModal 삭제 — 베타 기간 무제한 인쇄)
 
 // ============================================================
 // Main Page
@@ -166,7 +131,6 @@ export default function ProblemDetailPage({ params }: { params: { id: string } }
 
     // ✅ 모달 상태
     const [showCompletionModal, setShowCompletionModal] = useState(false);
-    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     // ✅ 저장 버튼 상태
     const [saveAllBtn, setSaveAllBtn] = useState<"전체 저장" | "저장 필요 ⚡" | "저장완료" | "저장중...">("전체 저장");
@@ -404,26 +368,13 @@ export default function ProblemDetailPage({ params }: { params: { id: string } }
         }
     };
 
-    // ✅ PDF 인쇄 핸들러
-    const handlePrint = async () => {
-        try {
-            const res = await fetch(`/api/pdf/print-gate?problemId=${problem?.id}`, { method: "POST" });
-            const json = await res.json();
-            if (json.allowed) {
-                window.open(`/api/pdf?type=notebook&subject=${encodeURIComponent(problem?.subject || "")}&single=${problem?.id}`, "_blank");
-                setShowCompletionModal(false);
-                // 인쇄 후 → 오답노트 페이지로 이동
-                setTimeout(() => {
-                    router.push(`/notebook/${encodeURIComponent(problem?.subject || "all")}?focus=${problem?.id}`);
-                }, 500);
-            } else {
-                setShowCompletionModal(false);
-                setShowPaymentModal(true);
-            }
-        } catch {
-            window.open(`/api/pdf?type=notebook`, "_blank");
-            setShowCompletionModal(false);
-        }
+    // ✅ PDF 인쇄 핸들러 — 베타 기간 무제한
+    const handlePrint = () => {
+        window.open(`/api/pdf?type=notebook&subject=${encodeURIComponent(problem?.subject || "")}&single=${problem?.id}`, "_blank");
+        setShowCompletionModal(false);
+        setTimeout(() => {
+            router.push(`/notebook/${encodeURIComponent(problem?.subject || "all")}?focus=${problem?.id}`);
+        }, 500);
     };
 
     if (loading) {
@@ -472,9 +423,7 @@ export default function ProblemDetailPage({ params }: { params: { id: string } }
                 />
             )}
 
-            {showPaymentModal && (
-                <PaymentModal onClose={() => setShowPaymentModal(false)} />
-            )}
+
 
             {/* 좌측 패널 */}
             <div className="w-[clamp(320px,33vw,400px)] bg-slate-900 text-white flex flex-col shadow-2xl z-10 border-r border-slate-800 shrink-0 h-full overflow-y-auto">

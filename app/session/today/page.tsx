@@ -91,11 +91,8 @@ export default function SessionSetupPage() {
             return;
         }
 
-        const isPro = profile?.is_pro;
-        window.open(`/api/pdf?type=test&status=review${!isPro ? '&preview=1' : ''}`, "_blank");
-        if (!isPro) {
-            showToast("미리보기는 2장까지만 제공됩니다. 전체 시험지는 PRO 버전을 이용해주세요!");
-        }
+        // 베타 기간: 전체 PDF 무제한 제공
+        window.open(`/api/pdf?type=test&status=review`, "_blank");
     };
 
     if (loading) {
@@ -164,7 +161,7 @@ export default function SessionSetupPage() {
                         <div className="text-left z-10 flex-1">
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-xs font-black tracking-widest uppercase mb-4 border border-rose-500/30">
                                 <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                                PRO EXCLUSIVE
+                                PRO EXCLUSIVE → 베타 무료 제공 중
                             </div>
                             <h2 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tight">
                                 시험 전에 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-400">헷갈린 문제</span>만 뽑아보세요!

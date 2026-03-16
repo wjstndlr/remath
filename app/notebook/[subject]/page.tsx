@@ -56,22 +56,18 @@ function NotebookSubjectPageInner({ params }: { params: { subject: Subject } }) 
     load();
   }, [router, supabase, subject]);
 
-  const openPdfNotebook = (preview?: boolean) => {
+  const openPdfNotebook = () => {
     const u = encodeURIComponent(activeUnit || "전체");
     const s = encodeURIComponent(subject);
     const unitParam = activeUnit === "전체" ? "" : `&unit=${u}`;
-    const prev = preview ? "&preview=1" : "";
-    window.open(`/api/pdf?type=notebook&subject=${s}${unitParam}${prev}`, "_blank");
-    if (preview) showToast("미리보기는 2페이지만 제공돼요. Pro로 전체 다운로드 가능!");
+    window.open(`/api/pdf?type=notebook&subject=${s}${unitParam}`, "_blank");
   };
 
-  const openPdfTest = (preview?: boolean) => {
+  const openPdfTest = () => {
     const u = encodeURIComponent(activeUnit || "전체");
     const s = encodeURIComponent(subject);
     const unitParam = activeUnit === "전체" ? "" : `&unit=${u}`;
-    const prev = preview ? "&preview=1" : "";
-    window.open(`/api/pdf?type=test&subject=${s}${unitParam}${prev}`, "_blank");
-    if (preview) showToast("미리보기는 2페이지만 제공돼요. Pro로 전체 다운로드 가능!");
+    window.open(`/api/pdf?type=test&subject=${s}${unitParam}`, "_blank");
   };
 
   return (

@@ -35,9 +35,9 @@ export default function NotebookFlip({
   onOpenTestPdf: (preview?: boolean) => void;
   userEmail?: string;
 }) {
-  // 관리자 계정이면 isPro처럼 취급
+  // ✅ 베타 기간 무료 개방 (모든 사용자 PRO 취급)
   const isAdmin = Boolean(ADMIN_EMAIL && userEmail === ADMIN_EMAIL);
-  const effectiveIsPro = isPro || isAdmin;
+  const effectiveIsPro = true;
 
   const units = useMemo(() => {
     const set = new Set<string>();
@@ -97,16 +97,6 @@ export default function NotebookFlip({
     if (dir === "next" && idx >= filtered.length - 1) return;
     if (dir === "prev" && idx <= 0) return;
 
-    if (
-      !effectiveIsPro &&
-      dir === "next" &&
-      filtered.length > PREVIEW_LIMIT &&
-      idx >= PREVIEW_LIMIT - 1
-    ) {
-      setPaywall(true);
-      return;
-    }
-
     setAnim(dir);
     // 페이지가 끝까지 넘어가는 느낌을 위해, 인덱스 변경을 애니메이션 후반부로 미룸
     window.setTimeout(() => {
@@ -165,26 +155,16 @@ export default function NotebookFlip({
 
         <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={() => (effectiveIsPro ? onOpenPdf(false) : onOpenPdf(true))}
-            className={cx(
-              "px-4 py-2.5 rounded-xl font-bold text-sm border min-h-[44px] flex items-center justify-center",
-              effectiveIsPro
-                ? "bg-slate-900 text-white border-slate-900 hover:bg-slate-800"
-                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-            )}
+            onClick={() => onOpenPdf(false)}
+            className="px-4 py-2.5 rounded-xl font-bold text-sm border min-h-[44px] flex items-center justify-center bg-slate-900 text-white border-slate-900 hover:bg-slate-800"
           >
-            📄 {subjectLabel} pdf{effectiveIsPro ? "" : " 미리보기"}
+            📄 {subjectLabel} PDF
           </button>
           <button
-            onClick={() => (effectiveIsPro ? onOpenTestPdf(false) : onOpenTestPdf(true))}
-            className={cx(
-              "px-4 py-2.5 rounded-xl font-bold text-sm border min-h-[44px] flex items-center justify-center",
-              effectiveIsPro
-                ? "bg-action text-white border-action hover:bg-blue-600"
-                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-            )}
+            onClick={() => onOpenTestPdf(false)}
+            className="px-4 py-2.5 rounded-xl font-bold text-sm border min-h-[44px] flex items-center justify-center bg-action text-white border-action hover:bg-blue-600"
           >
-            🖨️ {subjectLabel.replace("오답노트", "시험지")} pdf{effectiveIsPro ? "" : " 미리보기"}
+            🖨️ {subjectLabel.replace("오답노트", "시험지")} PDF
           </button>
         </div>
       </div>
@@ -243,24 +223,11 @@ export default function NotebookFlip({
           </div>
         ) : (
           <div className="relative">
-            {/* 페이지 카운터 + PRO 배너 */}
+            {/* 페이지 카운터 */}
             <div className="flex items-center justify-between mb-4 text-sm font-bold text-slate-600">
               <div>
                 <span className="text-slate-900 font-black">{idx + 1}</span> / {filtered.length}
-                {!effectiveIsPro && filtered.length > PREVIEW_LIMIT && (
-                  <span className="ml-3 text-xs font-black text-amber-600">
-                    미리보기 {PREVIEW_LIMIT}문항
-                  </span>
-                )}
               </div>
-              {!effectiveIsPro && filtered.length > PREVIEW_LIMIT && (
-                <Link
-                  href="/plans"
-                  className="text-xs font-black px-4 py-2 rounded-xl text-white pro-shimmer hover:opacity-90 transition min-h-[36px] flex items-center"
-                >
-                  ⚡ PRO로 전체 보기
-                </Link>
-              )}
             </div>
 
             {/* ========== 책 본문 (3D flip 적용) ========== */}
@@ -382,43 +349,17 @@ export default function NotebookFlip({
                     </div>
 
                     {/* ✅ 풀이 수정 버튼: 과목별 20문제까지 무료 */}
-                    {(() => {
-                      const sameSubjectProbs = problems.filter((p) => p.subject === current.subject);
-                      const posInSubject = sameSubjectProbs.findIndex((p) => p.id === current.id);
-                      const canEditFree = effectiveIsPro || posInSubject < FREE_EDIT_LIMIT;
-
-                      if (canEditFree) {
-                        return (
-                          <Link
-                            href={`/problem/${current.id}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditClick(e as any, current.id);
-                            }}
-                            // ✅ 어떤 환경에서도 클릭이 넘어가지 않게 이벤트 보호
-                            onPointerDown={(e) => e.stopPropagation()}
-                            onPointerUp={(e) => e.stopPropagation()}
-                            className="px-4 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 shrink-0 transition min-h-[44px] flex items-center"
-                          >
-                            ✍️ 풀이 수정
-                          </Link>
-                        );
-                      }
-
-                      return (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditPaywall(true);
-                          }}
-                          onPointerDown={(e) => e.stopPropagation()}
-                          onPointerUp={(e) => e.stopPropagation()}
-                          className="px-4 py-2.5 rounded-xl text-white font-bold text-xs shrink-0 pro-shimmer save-pulse min-h-[44px] flex items-center"
-                        >
-                          🔒 PRO로 수정
-                        </button>
-                      );
-                    })()}
+                    <Link
+                      href={`/problem/${current.id}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onPointerUp={(e) => e.stopPropagation()}
+                      className="px-4 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 shrink-0 transition min-h-[44px] flex items-center"
+                    >
+                      ✍️ 풀이 수정
+                    </Link>
                   </div>
 
                   {/* 메인: 손글씨 스냅샷 */}
@@ -488,73 +429,10 @@ export default function NotebookFlip({
                 </div>
               </div>
 
-              {/* =====  PRO 페이지 잠금 오버레이 ===== */}
-              {paywall && (
-                <div className="absolute inset-0 z-30 bg-white/80 backdrop-blur-sm flex items-center justify-center p-6">
-                  <div className="max-w-sm w-full rounded-[2rem] border border-slate-200 bg-white shadow-2xl p-8 text-center animate-in fade-in zoom-in duration-300">
-                    <div className="text-4xl mb-4">🔒</div>
-                    <div className="text-xl font-black text-slate-900">여기부터는 PRO</div>
-                    <p className="text-sm text-slate-600 mt-2 leading-relaxed">
-                      미리보기는 <b>{PREVIEW_LIMIT}문항</b>까지만 볼 수 있어요.
-                      <br />
-                      PRO로 업그레이드하면 전체 오답노트를 책처럼 볼 수 있어요.
-                    </p>
-                    <div className="mt-8 flex gap-3">
-                      <button
-                        onClick={() => setPaywall(false)}
-                        className="flex-1 px-4 py-3.5 rounded-xl border border-slate-200 font-bold text-slate-700 hover:bg-slate-50 transition min-h-[48px]"
-                      >
-                        닫기
-                      </button>
-                      <Link
-                        href="/plans"
-                        className="flex-1 px-4 py-3.5 rounded-xl bg-amber-500 text-white font-black hover:bg-amber-600 text-center transition min-h-[48px] flex items-center justify-center"
-                      >
-                        ⚡ PRO 보기
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}
       </div>
-
-      {/* 풀이 수정 PRO 유도 모달 */}
-      {editPaywall && (
-        <div
-          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
-          onClick={() => setEditPaywall(false)}
-        >
-          <div
-            className="w-full max-w-sm rounded-3xl bg-white shadow-2xl p-7 text-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="text-4xl mb-3">✍️🔒</div>
-            <div className="text-xl font-black text-slate-900">풀이 수정은 PRO 전용</div>
-            <p className="text-sm text-slate-600 mt-2 leading-relaxed">
-              각 과목별 <b>{FREE_EDIT_LIMIT}문제</b>까지는 무료로 수정할 수 있어요.
-              <br />
-              PRO로 업그레이드하면 <b>모든 문제를 무제한</b>으로 수정할 수 있어요.
-            </p>
-            <div className="mt-5 flex gap-2">
-              <button
-                onClick={() => setEditPaywall(false)}
-                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 font-bold text-slate-700 hover:bg-slate-50"
-              >
-                닫기
-              </button>
-              <Link
-                href="/plans"
-                className="flex-1 px-4 py-3 rounded-xl bg-amber-500 text-white font-black hover:bg-amber-600 text-center save-pulse"
-              >
-                ⚡ PRO 업그레이드
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 이미지 확대 모달 */}
       {imgModal && (
